@@ -7,7 +7,7 @@
               </form>
     <% for(let listing of allListing){%>
       <a  href="/listing/<%= listing._id %> " class="listing-link">
-       <div class="card col" >
+       <div class="card col listing-card" >
   <img src="<%= listing.image.url  %>" class="card-img-top" alt="listing_image" style="height:20rem">
   <div class="card-img-overlay">NM</div>
   <div class="card-body">
