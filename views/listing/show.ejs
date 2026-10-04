@@ -15,7 +15,7 @@
 
             <div class="card-body">
                 <p class="card-text">
-
+                     <i> <%= listing.owner.username %></i> <br>
                     <%= listing.description %>
                     <br>
 
@@ -33,6 +33,8 @@
         </div>
 
         <!-- Edit & Delete Buttons -->
+<% if(currentUser && currentUser._id.equals(listing.owner._id)) { %>
+       
         <div class="btns d-flex gap-2 mt-3">
 
             <a 
@@ -53,14 +55,14 @@
                     Delete
                 </button>
             </form>
-
-        </div>
-
     </div>
+    <% } %>
+
 
     <!-- Reviews Section -->
      <div class="col-8 offset-2  mb-3 mt-4">
         <hr>
+         <% if(currentUser) { %>
         <h4>Reviews:</h4>
         <form action="/listing/<%= listing.id %>/reviews" method="post" novalidate class = "needs-validation">
             <div class="mb-3 mt-4">
@@ -77,24 +79,25 @@
             </div>
             <button type="submit" class="btn btn-primary">Submit Review</button>
         </form>
-        <hr>
+          <hr>
+        <% } %>
         
-        <p><b> All reviews </b></p>
-         <div class="row">
-         <% for( let review of listing.reviews) { %>
-            <div class="card col-5 ms-3 mb-3 ">
-             <div class="card-body">
-                <h5 class="card-title">Nikhil Malik</h5>
-                 <p class="card-text"><%= review.comment %></p>
-                  <p class="card-text"><%= review.rating %></p>
-                  </div>
-                  <form class=" mb-3" method="post" action="/listing/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
-                    <button class="btn btn-sm btn-dark" >Delete</button>
-                  </form>
-             </div>
-           
-               <% } %>
-          </div>
+      <p><b> All reviews </b></p>
+<div class="row">
+<% for( let review of listing.reviews) { %>
+    <div class="card col-5 ms-3 mb-3 ">
+        <div class="card-body">
+            <h5 class="card-title">@<%= review.author ? review.author.username : "Anonymous" %></h5>
+            <p class="card-text"><%= review.comment %></p>
+            <p class="card-text"><%= review.rating %></p>
+        </div>
+        <% if (currentUser && review.author && review.author._id.equals(currentUser._id)) { %>
+        <form class=" mb-3" method="post" action="/listing/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+            <button class="btn btn-sm btn-dark">Delete</button>
+        </form>
+        <% } %>
+    </div>
+<% } %>
 
      </div>
 </div>
