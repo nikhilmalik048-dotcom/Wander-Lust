@@ -1,3 +1,11 @@
+if(process.env.NODE_ENV !== "production"){
+    // index.js
+require('dotenv').config();
+
+}
+
+
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -10,7 +18,7 @@ const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
 // express session package
 const session = require("express-session");
-// flash package for flash messages
+const MongoStore = require("connect-mongo").default;// flash package for flash messages
 const flash = require("connect-flash");
 // passport package for authentication
 const passport = require("passport");
@@ -24,7 +32,8 @@ const reviewsRoutes = require("./routes/reviews.js");
 const userRoutes = require("./routes/user.js");
 
 
-const MANGOOSE_URL = "mongodb://127.0.0.1:27017/Wanderlust";
+// const MANGOOSE_URL = "mongodb://127.0.0.1:27017/Wanderlust";
+const dbUrl = process.env.ATLASDB_URL;
 
 main()
 .then(()=>{
@@ -34,7 +43,7 @@ main()
     console.log(err);
 });
 async function main(){
-    await mongoose.connect(MANGOOSE_URL);
+    await mongoose.connect(dbUrl);
 }
 
 // set path for ejs
@@ -52,8 +61,24 @@ app.use((req, res, next) => {
     console.log("REQUEST:", req.method, req.originalUrl);
     next();
 });
+
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    crypto: {
+        secret: process.env.SECRET,
+    },
+    touchAfter: 24 * 3600
+});
+
+store.on("error", (err) => {
+    console.log("Error in Mongo Session Store:", err);
+});
+store.on("errors",()=>{
+    console.log("Errors in MONGO SESSION STORE",err);
+});
 const sessionoptions = {
-    secret: "mysupersecretcode",
+    store,
+    secret:process.env.SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -63,9 +88,11 @@ const sessionoptions = {
     },
 };
 
-app.get("/",(req,res)=>{
-    res.send("hi i am root");
-});
+// app.get("/",(req,res)=>{
+//     res.send("hi i am root");
+// });
+
+
 
 app.use(session(sessionoptions));
 app.use(flash());
@@ -92,19 +119,12 @@ app.use((req,res,next)=>{
 
 
 app.use("/listing",listingsRoutes);
-
 app.use("/listing/:id/reviews",reviewsRoutes);
-
-
 app.use("/",userRoutes);
 
 
 
-// for All errors handling code
-app.all("/{*splat}", (req, res, next) => {
-    console.log("404 hit:", req.method, req.originalUrl);
-    next(new ExpressError(404, "Page Not Found"));
-});
+
 // for All errors handling code
 app.all("/{*splat}", (req, res, next) => {
     console.log("404 hit:", req.method, req.originalUrl);

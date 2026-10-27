@@ -7,7 +7,7 @@
  
 <h3>Edit your Listing</h3>
 
-<form method="POST" action="/listing/<%= listing._id %>?_method=PUT" >
+<form method="POST" action="/listing/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" encType="multipart/form-data">
 
     <!-- Title -->
      <div class="mb-2">
@@ -51,15 +51,17 @@
     </div>
 </div>
 
-    <!-- Image -->
+ <!-- Image -->
 <div class="mb-2">
-    <label for="image" class="form-label">Image URL</label>
+    <p class="mb-1">Current image:</p>
+    <img src="<%= originalImageUrl %>" alt="current image" style="max-width: 200px;" class="mb-2 d-block">
+
+    <label for="image" class="form-label">Upload new image (optional)</label>
     <input
-        type="text"
-        name="listing[image][url]"
-        value="<%= listing.image.url %>"
+        type="file"
+        id="image"
+        name="listing[image]"
         class="form-control"
-        required
     >
     <div class="valid-feedback">
         Looks good!
